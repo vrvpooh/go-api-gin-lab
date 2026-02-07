@@ -47,3 +47,36 @@ func (r *StudentRepository) Create(s models.Student) error {
 	)
 	return err
 }
+
+func (r *StudentRepository) Update(id string, s models.Student) error {
+	// ใช้ SQL UPDATE เพื่อเปลี่ยนชื่อ, สาขา และเกรด
+	result, err := r.DB.Exec(
+		"UPDATE students SET name = ?, major = ?, gpa = ? WHERE id = ?",
+		s.Name, s.Major, s.GPA, id,
+	)
+	if err != nil {
+		return err
+	}
+
+	// ตรวจสอบว่ามีแถวที่ถูกแก้ไขหรือไม่ (ถ้า ID ไม่มีในระบบ RowsAffected จะเป็น 0)
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return sql.ErrNoRows // ส่งค่ากลับไปบอกว่าไม่เจอข้อมูล
+	}
+	return nil
+}
+
+func (r *StudentRepository) Delete(id string) error {
+	// ใช้คำสั่ง SQL DELETE
+	result, err := r.DB.Exec("DELETE FROM students WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	// ตรวจสอบว่ามีแถวที่ถูกลบจริงหรือไม่
+	rows, _ := result.RowsAffected()
+	if rows == 0 {
+		return sql.ErrNoRows // ถ้า ID ไม่มีในระบบ ให้ส่ง Error กลับไป
+	}
+	return nil
+}

@@ -46,3 +46,41 @@ func (h *StudentHandler) CreateStudent(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, student)
 }
+
+func (h *StudentHandler) UpdateStudent(c *gin.Context) {
+	// 1. ดึง ID จาก URL parameter (:id)
+	id := c.Param("id")
+
+	// 2. รับข้อมูล JSON จาก Request Body
+	var student models.Student
+	if err := c.ShouldBindJSON(&student); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 3. ส่งข้อมูลไปให้ Service ทำงาน
+	if err := h.Service.UpdateStudent(id, student); err != nil {
+		// ถ้าไม่พบ ID ให้ส่ง 404
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+
+	// 4. ถ้าสำเร็จ ส่งข้อมูลที่อัปเดตแล้วกลับไปพร้อม Status 200 OK
+	student.Id = id
+	c.JSON(http.StatusOK, student)
+}
+
+func (h *StudentHandler) DeleteStudent(c *gin.Context) {
+	// 1. รับ ID จาก URL Parameter
+	id := c.Param("id")
+
+	// 2. เรียก Service ให้ลบข้อมูล
+	if err := h.Service.DeleteStudent(id); err != nil {
+		// หากไม่พบ ID หรือลบไม่สำเร็จ ให้ส่ง 404
+		c.JSON(http.StatusNotFound, gin.H{"error": "Student not found"})
+		return
+	}
+
+	// 3. หากลบสำเร็จ ให้ส่ง Status 204 No Content (ไม่มีเนื้อหาตอบกลับ)
+	c.Status(http.StatusNoContent)
+}
