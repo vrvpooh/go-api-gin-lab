@@ -60,7 +60,7 @@ Success: Status 200 OK
 
 #### 3. Get student by ID
 
-Endpoint: `PUT /students/:id`
+Endpoint: `GET /students/:id`
 
 URL: http://localhost:8080/students/:id (/students/66090001)
 
